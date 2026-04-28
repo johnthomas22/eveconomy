@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EV vs Fuel Cost Comparison</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>EV vs Fuel Cost Comparison</h1>
+    <p class="subtitle">Compare the running costs of electric and petrol/diesel vehicles</p>
+  </header>
+
+  <main>
+    <!-- Settings -->
+    <section class="card settings-card">
+      <h2>Settings</h2>
+      <div class="settings-row">
+        <div class="field">
+          <label for="currency">Currency</label>
+          <select id="currency">
+            <option value="£" selected>British Pound (£)</option>
+            <option value="$">US Dollar ($)</option>
+            <option value="€">Euro (€)</option>
+            <option value="C$">Canadian Dollar (C$)</option>
+            <option value="A$">Australian Dollar (A$)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="unitSystem">Gallon type</label>
+          <select id="unitSystem">
+            <option value="imperial" selected>Imperial / UK gallon (4.546 L)</option>
+            <option value="us">US gallon (3.785 L)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="annualMiles">Annual mileage</label>
+          <input type="number" id="annualMiles" placeholder="e.g. 10000" min="0" />
+        </div>
+      </div>
+    </section>
+
+    <div class="comparison-grid">
+      <!-- EV Card -->
+      <section class="card ev-card">
+        <h2>Electric Vehicle</h2>
+        <div class="field">
+          <label for="evEfficiency">Efficiency (miles per kWh)</label>
+          <input type="number" id="evEfficiency" placeholder="e.g. 3.5" min="0" step="0.1" />
+        </div>
+        <div class="field">
+          <label for="electricityPrice">Electricity price (per kWh)</label>
+          <div class="input-prefix-wrap">
+            <span class="prefix" id="evPricePrefix">£</span>
+            <input type="number" id="electricityPrice" placeholder="e.g. 0.24" min="0" step="0.01" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="evPurchasePrice">Purchase price <span class="optional">(optional)</span></label>
+          <div class="input-prefix-wrap">
+            <span class="prefix" id="evPurchasePrefix">£</span>
+            <input type="number" id="evPurchasePrice" placeholder="e.g. 35000" min="0" />
+          </div>
+        </div>
+        <div class="result-box ev-result" id="evResult" hidden>
+          <div class="result-line">
+            <span>Cost per mile</span>
+            <strong id="evCostPerMile">—</strong>
+          </div>
+          <div class="result-line">
+            <span>Cost per km</span>
+            <strong id="evCostPerKm">—</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fuel Card -->
+      <section class="card fuel-card">
+        <h2>Petrol / Diesel Vehicle</h2>
+        <div class="field">
+          <label for="fuelMpg">Fuel efficiency (MPG)</label>
+          <input type="number" id="fuelMpg" placeholder="e.g. 45" min="0" step="0.1" />
+        </div>
+        <div class="field">
+          <label for="fuelPrice">Fuel price</label>
+          <div class="fuel-price-row">
+            <div class="input-prefix-wrap">
+              <span class="prefix" id="fuelPricePrefix">£</span>
+              <input type="number" id="fuelPrice" placeholder="e.g. 1.50" min="0" step="0.01" />
+            </div>
+            <select id="fuelPriceUnit">
+              <option value="litre" selected>per litre</option>
+              <option value="gallon">per gallon</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="fuelPurchasePrice">Purchase price <span class="optional">(optional)</span></label>
+          <div class="input-prefix-wrap">
+            <span class="prefix" id="fuelPurchasePrefix">£</span>
+            <input type="number" id="fuelPurchasePrice" placeholder="e.g. 25000" min="0" />
+          </div>
+        </div>
+        <div class="result-box fuel-result" id="fuelResult" hidden>
+          <div class="result-line">
+            <span>Cost per mile</span>
+            <strong id="fuelCostPerMile">—</strong>
+          </div>
+          <div class="result-line">
+            <span>Cost per km</span>
+            <strong id="fuelCostPerKm">—</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Summary -->
+    <section class="card summary-card" id="summaryCard" hidden>
+      <h2>Comparison Summary</h2>
+      <div id="summaryContent"></div>
+    </section>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button id="clearBtn" class="btn btn-secondary">Clear all</button>
+      <button id="downloadBtn" class="btn btn-primary" id="downloadBtn">Save results</button>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
