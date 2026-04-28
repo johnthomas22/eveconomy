@@ -1,0 +1,12 @@
+{
+  "name": "eveconomy",
+  "version": "1.0.0",
+  "description": "EV vs Fuel Cost Comparison — Android PWA",
+  "scripts": {
+    "icons": "node generate-icons.mjs",
+    "serve": "npx serve ."
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
+  }
+}

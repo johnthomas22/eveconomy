@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="#1a365d"/>
+
+  <!-- Lightning bolt (EV) — left side, white -->
+  <polygon points="210,80 150,272 210,272 170,432 310,220 240,220 300,80" fill="#68d391"/>
+
+  <!-- Fuel drop (petrol) — right side -->
+  <path d="M360,160 Q400,200 400,250 Q400,310 360,330 Q320,310 320,250 Q320,200 360,160 Z" fill="#fc8181"/>
+  <polygon points="360,130 344,162 376,162" fill="#fc8181"/>
+</svg>
