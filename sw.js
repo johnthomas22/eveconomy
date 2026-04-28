@@ -1,15 +1,16 @@
 'use strict';
 
-const CACHE = 'ev-calc-v1';
+const CACHE = 'ev-calc-v2';
+const BASE = '/eveconomy';
 const SHELL = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json',
-  '/icons/icon.svg',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/style.css',
+  BASE + '/app.js',
+  BASE + '/manifest.json',
+  BASE + '/icons/icon.svg',
+  BASE + '/icons/icon-192.png',
+  BASE + '/icons/icon-512.png',
 ];
 
 self.addEventListener('install', event => {

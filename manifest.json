@@ -2,7 +2,7 @@
   "name": "EV vs Fuel Cost Comparison",
   "short_name": "EV Calc",
   "description": "Compare the running costs of electric and petrol/diesel vehicles",
-  "start_url": "/",
+  "start_url": "/eveconomy/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1a365d",
