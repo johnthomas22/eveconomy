@@ -29,15 +29,24 @@ There are no tests and no linter configured.
 All logic lives in three files:
 
 - **`app.js`** — all calculation and DOM logic. `recalculate()` is the central function called on every input change. It calls `calcEvCostPerMile()` and `calcFuelCostPerMile()`, updates per-vehicle result boxes, then builds the comparison summary via `buildBreakEvenHtml()`. No state object — values are read directly from DOM inputs on each recalculation.
-- **`index.html`** — single-page layout with Settings, EV card, Fuel card, Summary, and Actions sections. Registers the service worker inline.
+- **`index.html`** — single-page layout with Settings, EV card, Fuel card, Summary, and Actions sections. Registers the service worker inline at the hardcoded path `/eveconomy/sw.js` (GitHub Pages subdirectory deployment).
 - **`sw.js`** — cache-first service worker. The cache key is hardcoded as `ev-calc-v1`; bump this string when updating cached assets so old caches are evicted on activate.
+- **`style.css`** — all styling; no CSS framework.
 
 **Icons**: `icons/icon.svg` is the source of truth. `generate-icons.mjs` uses `sharp` to rasterise it to 192×192 and 512×512 PNGs. Re-run whenever the SVG changes.
 
 **PWA**: `manifest.json` sets `display: standalone` and `orientation: portrait`. The app is designed for mobile (Android) use.
 
+## recalculate() rendering logic
+
+- Per-vehicle result boxes (`evResult`, `fuelResult`) show only when their respective inputs are valid.
+- `summaryCard` only renders when **both** EV and fuel sides are filled in.
+- Within the summary: annual savings and CO₂ blocks require `annualMiles`; break-even blocks require both purchase prices.
+- `getResultsText()` produces the plain-text export triggered by the download button.
+
 ## Key constants (app.js)
 
 - `LITRES_PER_IMPERIAL_GALLON = 4.546` / `LITRES_PER_US_GALLON = 3.785` — unit conversion
+- `KM_PER_MILE = 1.60934` — used to display per-km costs alongside per-mile costs
 - `CO2_FUEL_KG_PER_MILE = 0.21` / `CO2_EV_KG_PER_MILE = 0.05` — fixed CO₂ estimates used in the annual summary
 - The `$` alias maps to `document.getElementById`
