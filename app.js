@@ -422,13 +422,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('downloadBtn').addEventListener('click', () => {
     const text = getResultsText();
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = 'ev-fuel-comparison.txt';
-    a.click();
-    URL.revokeObjectURL(url);
+    if (navigator.share) {
+      navigator.share({ title: 'EV vs Fuel Cost Comparison', text }).catch(() => {});
+    } else {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'ev-fuel-comparison.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   });
 
   recalculate();
