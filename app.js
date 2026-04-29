@@ -353,37 +353,63 @@ function recalculate() {
 }
 
 function getResultsText() {
-  const cur = getCurrency();
-  const unit = $('unitSystem').value === 'imperial' ? 'Imperial' : 'US';
-  const lines = [
-    'EV vs Fuel Cost Comparison',
-    '===========================',
-    `Currency: ${cur}  |  Gallon type: ${unit}`,
-    '',
-  ];
-
-  const evCpm   = calcEvCostPerMile();
-  const fuelCpm = calcFuelCostPerMile();
-
-  if (evCpm !== null) {
-    lines.push(`EV cost per mile:   ${fmt(evCpm, 3)}`);
-    lines.push(`EV cost per km:     ${fmt(evCpm / KM_PER_MILE, 3)}`);
-    lines.push('');
-  }
-  if (fuelCpm !== null) {
-    lines.push(`Fuel cost per mile: ${fmt(fuelCpm, 3)}`);
-    lines.push(`Fuel cost per km:   ${fmt(fuelCpm / KM_PER_MILE, 3)}`);
-    lines.push('');
-  }
-
+  const cur         = getCurrency();
+  const unit        = $('unitSystem').value === 'imperial' ? 'Imperial' : 'US';
   const annualMiles = parseFloat($('annualMiles').value) || null;
-  if (evCpm && fuelCpm && annualMiles) {
-    const savings = Math.abs(fuelCpm - evCpm) * annualMiles;
-    const winner  = fuelCpm > evCpm ? 'EV' : 'Fuel';
-    lines.push(`Annual savings (${winner}): ${fmt(savings, 0)} at ${annualMiles.toLocaleString()} miles/year`);
+  const lines = ['EV vs Fuel Cost Comparison', '==========================='];
+  if (annualMiles) lines.push(`Annual mileage:    ${annualMiles.toLocaleString()} miles/year`);
+  lines.push(`Currency: ${cur}  |  Gallon: ${unit}`, '');
+
+  // EV section
+  lines.push('[ Electric Vehicle ]');
+  const evPresetLabel = $('evPreset').selectedOptions[0]?.text;
+  if (evPresetLabel && $('evPreset').value) lines.push(`Model:             ${evPresetLabel}`);
+  const evEff   = parseFloat($('evEfficiency').value);
+  const elecPx  = parseFloat($('electricityPrice').value);
+  const evPurch = parseFloat($('evPurchasePrice').value);
+  if (evEff)   lines.push(`Efficiency:        ${evEff} miles/kWh`);
+  if (elecPx)  lines.push(`Electricity price: ${fmt(elecPx)}/kWh`);
+  if (evPurch) lines.push(`Purchase price:    ${fmt(evPurch, 0)}`);
+  const evCpm = calcEvCostPerMile();
+  if (evCpm !== null) {
+    lines.push(`Cost per mile:     ${fmt(evCpm, 3)}`);
+    lines.push(`Cost per km:       ${fmt(evCpm / KM_PER_MILE, 3)}`);
+  }
+  lines.push('');
+
+  // Fuel section
+  lines.push('[ Petrol / Diesel ]');
+  const fuelPresetLabel = $('fuelPreset').selectedOptions[0]?.text;
+  if (fuelPresetLabel && $('fuelPreset').value) lines.push(`Model:             ${fuelPresetLabel}`);
+  const fuelMpg   = parseFloat($('fuelMpg').value);
+  const fuelPx    = parseFloat($('fuelPrice').value);
+  const fuelUnit  = $('fuelPriceUnit').value;
+  const fuelPurch = parseFloat($('fuelPurchasePrice').value);
+  if (fuelMpg)   lines.push(`Fuel efficiency:   ${fuelMpg} MPG`);
+  if (fuelPx)    lines.push(`Fuel price:        ${fmt(fuelPx)}/${fuelUnit}`);
+  if (fuelPurch) lines.push(`Purchase price:    ${fmt(fuelPurch, 0)}`);
+  const fuelCpm = calcFuelCostPerMile();
+  if (fuelCpm !== null) {
+    lines.push(`Cost per mile:     ${fmt(fuelCpm, 3)}`);
+    lines.push(`Cost per km:       ${fmt(fuelCpm / KM_PER_MILE, 3)}`);
+  }
+  lines.push('');
+
+  // Comparison summary
+  if (evCpm !== null && fuelCpm !== null) {
+    lines.push('[ Comparison ]');
+    const savingsPerMile = fuelCpm - evCpm;
+    const winner = savingsPerMile > 0 ? 'EV' : 'Fuel';
+    lines.push(`${winner} is cheaper by ${fmt(Math.abs(savingsPerMile), 3)}/mile (${fmt(Math.abs(savingsPerMile) / KM_PER_MILE, 3)}/km)`);
+    if (annualMiles) {
+      const annualSavings = Math.abs(savingsPerMile) * annualMiles;
+      lines.push(`Annual savings (${winner}): ${fmt(annualSavings, 0)}`);
+      const co2Saved = (CO2_FUEL_KG_PER_MILE - CO2_EV_KG_PER_MILE) * annualMiles;
+      lines.push(`CO2 saved (EV vs petrol): ${co2Saved.toFixed(0)} kg/yr`);
+    }
+    lines.push('');
   }
 
-  lines.push('');
   lines.push(`Generated: ${new Date().toLocaleString()}`);
   return lines.join('\n');
 }
