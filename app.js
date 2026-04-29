@@ -24,6 +24,8 @@ const EV_PRESETS = [
   { group: 'Kia',        label: 'EV6 RWD (77 kWh)',              milesPerKwh: 4.3 },
   { group: 'Kia',        label: 'Niro EV (64 kWh)',              milesPerKwh: 3.9 },
   { group: 'Nissan',     label: 'Leaf 40 kWh',                   milesPerKwh: 4.7 },
+  { group: 'Nissan',     label: 'Leaf e+ 62 kWh (2022)',         milesPerKwh: 4.1 },
+  { group: 'Nissan',     label: 'Leaf (2026, est.)',             milesPerKwh: 4.4 },
   { group: 'Renault',    label: 'Megane E-Tech (60 kWh)',         milesPerKwh: 4.0 },
   { group: 'Renault',    label: 'Renault 5 E-Tech (52 kWh)',      milesPerKwh: 4.3 },
   { group: 'MG',         label: 'MG4 Standard Range (51 kWh)',   milesPerKwh: 4.3 },
@@ -37,22 +39,130 @@ const EV_PRESETS = [
   { group: 'BYD',        label: 'Atto 3 (60 kWh)',              milesPerKwh: 3.5 },
 ];
 
-function populateEvPresets() {
-  const sel = $('evPreset');
+// Approximate WLTP combined MPG for top UK-selling petrol/diesel/hybrid models
+const FUEL_PRESETS = [
+  { group: 'Audi',        label: 'A3 35 TFSI (1.5 petrol)',          mpg: 47 },
+  { group: 'Audi',        label: 'A3 35 TDI (2.0 diesel)',           mpg: 57 },
+  { group: 'Audi',        label: 'A4 35 TFSI (1.5 petrol)',          mpg: 42 },
+  { group: 'Audi',        label: 'A4 35 TDI (2.0 diesel)',           mpg: 54 },
+  { group: 'Audi',        label: 'Q3 35 TFSI (1.5 petrol)',          mpg: 40 },
+  { group: 'Audi',        label: 'Q5 40 TDI (2.0 diesel)',           mpg: 44 },
+  { group: 'BMW',         label: '1 Series 118i (1.5 petrol)',        mpg: 46 },
+  { group: 'BMW',         label: '1 Series 118d (2.0 diesel)',        mpg: 58 },
+  { group: 'BMW',         label: '3 Series 320i (2.0 petrol)',        mpg: 42 },
+  { group: 'BMW',         label: '3 Series 320d (2.0 diesel)',        mpg: 55 },
+  { group: 'BMW',         label: '5 Series 520i (2.0 petrol)',        mpg: 42 },
+  { group: 'BMW',         label: '5 Series 520d (2.0 diesel)',        mpg: 54 },
+  { group: 'BMW',         label: 'X1 xDrive20i (2.0 petrol)',        mpg: 38 },
+  { group: 'BMW',         label: 'X3 20i (2.0 petrol)',              mpg: 36 },
+  { group: 'Dacia',       label: 'Sandero 1.0 TCe 90',               mpg: 52 },
+  { group: 'Dacia',       label: 'Duster 1.0 TCe 90',                mpg: 44 },
+  { group: 'Dacia',       label: 'Jogger 1.0 TCe 110',               mpg: 47 },
+  { group: 'Ford',        label: 'Fiesta 1.0 EcoBoost 95',           mpg: 55 },
+  { group: 'Ford',        label: 'Fiesta 1.0 EcoBoost 125',          mpg: 53 },
+  { group: 'Ford',        label: 'Focus 1.0 EcoBoost 125',           mpg: 52 },
+  { group: 'Ford',        label: 'Puma 1.0 EcoBoost 125 mHEV',       mpg: 52 },
+  { group: 'Ford',        label: 'Kuga 1.5 EcoBoost 150',            mpg: 38 },
+  { group: 'Ford',        label: 'Kuga PHEV 2.5 (CS mode)',          mpg: 35 },
+  { group: 'Honda',       label: 'Jazz e:HEV 1.5 hybrid',            mpg: 62 },
+  { group: 'Honda',       label: 'HR-V e:HEV 1.5 hybrid',            mpg: 52 },
+  { group: 'Honda',       label: 'Civic e:HEV 2.0 hybrid',           mpg: 57 },
+  { group: 'Hyundai',     label: 'i20 1.0 T-GDi 100',               mpg: 52 },
+  { group: 'Hyundai',     label: 'i30 1.0 T-GDi 120',               mpg: 46 },
+  { group: 'Hyundai',     label: 'Bayon 1.0 T-GDi 100',             mpg: 50 },
+  { group: 'Hyundai',     label: 'Tucson 1.6 T-GDi 150',            mpg: 35 },
+  { group: 'Hyundai',     label: 'Tucson HEV 1.6 230',              mpg: 46 },
+  { group: 'Kia',         label: 'Stonic 1.0 T-GDi 120',            mpg: 44 },
+  { group: 'Kia',         label: 'Ceed 1.5 T-GDi 160',              mpg: 43 },
+  { group: 'Kia',         label: 'Niro HEV 1.6 GDi 141',            mpg: 60 },
+  { group: 'Kia',         label: 'Sportage 1.6 T-GDi 150',          mpg: 38 },
+  { group: 'Kia',         label: 'Sportage HEV 1.6 230',            mpg: 47 },
+  { group: 'Land Rover',  label: 'Defender 90 P300',                 mpg: 28 },
+  { group: 'Land Rover',  label: 'Discovery Sport P200',             mpg: 32 },
+  { group: 'Land Rover',  label: 'Range Rover Evoque P200',          mpg: 32 },
+  { group: 'Mazda',       label: 'Mazda2 1.5 SKYACTIV-G 75',         mpg: 52 },
+  { group: 'Mazda',       label: 'Mazda3 2.0 SKYACTIV-X 186',        mpg: 47 },
+  { group: 'Mazda',       label: 'CX-30 2.0 SKYACTIV-X 186',         mpg: 45 },
+  { group: 'Mazda',       label: 'CX-5 2.0 SKYACTIV-G 165',          mpg: 38 },
+  { group: 'Mercedes',    label: 'A-Class A180 (1.4 petrol)',         mpg: 48 },
+  { group: 'Mercedes',    label: 'A-Class A200d (2.0 diesel)',        mpg: 60 },
+  { group: 'Mercedes',    label: 'C-Class C200 (2.0 petrol)',         mpg: 42 },
+  { group: 'Mercedes',    label: 'C-Class C220d (2.0 diesel)',        mpg: 57 },
+  { group: 'Mercedes',    label: 'GLA 200 (1.4 petrol)',              mpg: 44 },
+  { group: 'Mercedes',    label: 'GLC 300 (2.0 petrol)',              mpg: 35 },
+  { group: 'Mitsubishi',  label: 'Outlander PHEV 2.0 (CS mode)',      mpg: 33 },
+  { group: 'MINI',        label: 'Cooper 1.5 (136 hp)',               mpg: 50 },
+  { group: 'MINI',        label: 'Cooper S 2.0 (178 hp)',             mpg: 44 },
+  { group: 'MINI',        label: 'Countryman Cooper 1.5',             mpg: 44 },
+  { group: 'Nissan',      label: 'Juke 1.0 DIG-T 114',               mpg: 42 },
+  { group: 'Nissan',      label: 'Juke Hybrid 1.6 143',              mpg: 52 },
+  { group: 'Nissan',      label: 'Qashqai 1.3 mHEV 140',             mpg: 42 },
+  { group: 'Nissan',      label: 'Qashqai e-POWER 190',              mpg: 50 },
+  { group: 'Peugeot',     label: '208 1.2 PureTech 75',              mpg: 57 },
+  { group: 'Peugeot',     label: '208 1.2 PureTech 100',             mpg: 54 },
+  { group: 'Peugeot',     label: '2008 1.2 PureTech 100',            mpg: 48 },
+  { group: 'Peugeot',     label: '308 1.2 PureTech 130',             mpg: 48 },
+  { group: 'Peugeot',     label: '3008 1.2 PureTech 130',            mpg: 44 },
+  { group: 'Renault',     label: 'Clio 1.0 TCe 90',                  mpg: 55 },
+  { group: 'Renault',     label: 'Clio E-Tech 145 hybrid',           mpg: 68 },
+  { group: 'Renault',     label: 'Captur 1.0 TCe 90',                mpg: 48 },
+  { group: 'Renault',     label: 'Captur E-Tech 145 hybrid',         mpg: 60 },
+  { group: 'Renault',     label: 'Arkana E-Tech 145 hybrid',         mpg: 55 },
+  { group: 'SEAT/Cupra',  label: 'SEAT Ibiza 1.0 TSI 95',            mpg: 54 },
+  { group: 'SEAT/Cupra',  label: 'SEAT Leon 1.5 TSI 130',            mpg: 48 },
+  { group: 'SEAT/Cupra',  label: 'SEAT Ateca 1.5 TSI 150',           mpg: 42 },
+  { group: 'SEAT/Cupra',  label: 'Cupra Formentor 1.5 TSI 150',      mpg: 40 },
+  { group: 'Skoda',       label: 'Fabia 1.0 MPI 80',                 mpg: 55 },
+  { group: 'Skoda',       label: 'Fabia 1.0 TSI 95',                 mpg: 53 },
+  { group: 'Skoda',       label: 'Kamiq 1.0 TSI 95',                 mpg: 48 },
+  { group: 'Skoda',       label: 'Octavia 1.0 TSI 110',              mpg: 54 },
+  { group: 'Skoda',       label: 'Octavia 2.0 TDI 115',              mpg: 59 },
+  { group: 'Skoda',       label: 'Karoq 1.5 TSI 150',                mpg: 43 },
+  { group: 'Toyota',      label: 'Aygo X 1.0 72',                    mpg: 52 },
+  { group: 'Toyota',      label: 'Yaris Hybrid 1.5 116',             mpg: 68 },
+  { group: 'Toyota',      label: 'Yaris Cross Hybrid 1.5',           mpg: 60 },
+  { group: 'Toyota',      label: 'Corolla 1.8 Hybrid 122',           mpg: 57 },
+  { group: 'Toyota',      label: 'Corolla 2.0 Hybrid 196',           mpg: 55 },
+  { group: 'Toyota',      label: 'C-HR 1.8 Hybrid 122',             mpg: 57 },
+  { group: 'Toyota',      label: 'C-HR 2.0 Hybrid 196',             mpg: 55 },
+  { group: 'Toyota',      label: 'RAV4 Hybrid 2.5 222',              mpg: 47 },
+  { group: 'Vauxhall',    label: 'Corsa 1.2 75',                     mpg: 54 },
+  { group: 'Vauxhall',    label: 'Corsa 1.2 100',                    mpg: 52 },
+  { group: 'Vauxhall',    label: 'Astra 1.2 Turbo 130',              mpg: 48 },
+  { group: 'Vauxhall',    label: 'Mokka 1.2 Turbo 130',              mpg: 45 },
+  { group: 'Vauxhall',    label: 'Grandland 1.2 Turbo 130',          mpg: 44 },
+  { group: 'Volkswagen',  label: 'Polo 1.0 TSI 95',                  mpg: 55 },
+  { group: 'Volkswagen',  label: 'Polo 1.0 TSI 110',                 mpg: 54 },
+  { group: 'Volkswagen',  label: 'Golf 1.0 eTSI 110 (mHEV)',         mpg: 57 },
+  { group: 'Volkswagen',  label: 'Golf 1.5 eTSI 150 (mHEV)',         mpg: 54 },
+  { group: 'Volkswagen',  label: 'Golf 2.0 TDI 150',                 mpg: 57 },
+  { group: 'Volkswagen',  label: 'T-Roc 1.0 TSI 115',                mpg: 48 },
+  { group: 'Volkswagen',  label: 'Tiguan 1.5 eTSI 150',              mpg: 47 },
+  { group: 'Volkswagen',  label: 'Passat 2.0 TDI 150',               mpg: 57 },
+  { group: 'Volvo',       label: 'XC40 B3 (mild hybrid)',             mpg: 42 },
+  { group: 'Volvo',       label: 'XC40 B4 (mild hybrid)',             mpg: 40 },
+  { group: 'Volvo',       label: 'XC60 B4 (mild hybrid)',             mpg: 38 },
+  { group: 'Volvo',       label: 'XC60 B5 (mild hybrid)',             mpg: 35 },
+];
+
+function buildGroupedSelect(sel, presets, valueKey) {
   const groups = {};
-  EV_PRESETS.forEach(p => { (groups[p.group] ??= []).push(p); });
-  Object.entries(groups).forEach(([groupName, presets]) => {
+  presets.forEach(p => { (groups[p.group] ??= []).push(p); });
+  Object.entries(groups).forEach(([groupName, items]) => {
     const og = document.createElement('optgroup');
     og.label = groupName;
-    presets.forEach(p => {
+    items.forEach(p => {
       const opt = document.createElement('option');
-      opt.value = p.milesPerKwh;
+      opt.value = p[valueKey];
       opt.textContent = p.label;
       og.appendChild(opt);
     });
     sel.appendChild(og);
   });
 }
+
+function populateEvPresets()   { buildGroupedSelect($('evPreset'),   EV_PRESETS,   'milesPerKwh'); }
+function populateFuelPresets() { buildGroupedSelect($('fuelPreset'), FUEL_PRESETS, 'mpg'); }
 
 function getLitresPerGallon() {
   return $('unitSystem').value === 'imperial'
@@ -281,16 +391,19 @@ function getResultsText() {
 // Wire up events
 document.addEventListener('DOMContentLoaded', () => {
   populateEvPresets();
+  populateFuelPresets();
 
   $('evPreset').addEventListener('change', () => {
     const val = $('evPreset').value;
-    if (val) {
-      $('evEfficiency').value = val;
-      recalculate();
-    }
+    if (val) { $('evEfficiency').value = val; recalculate(); }
   });
-
   $('evEfficiency').addEventListener('input', () => { $('evPreset').value = ''; });
+
+  $('fuelPreset').addEventListener('change', () => {
+    const val = $('fuelPreset').value;
+    if (val) { $('fuelMpg').value = val; recalculate(); }
+  });
+  $('fuelMpg').addEventListener('input', () => { $('fuelPreset').value = ''; });
 
   const inputs = [
     'currency', 'unitSystem', 'annualMiles',
@@ -302,6 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('clearBtn').addEventListener('click', () => {
     ['annualMiles', 'evEfficiency', 'electricityPrice', 'evPurchasePrice',
      'fuelMpg', 'fuelPrice', 'fuelPurchasePrice'].forEach(id => { $(id).value = ''; });
+    $('evPreset').value = '';
+    $('fuelPreset').value = '';
     recalculate();
   });
 
