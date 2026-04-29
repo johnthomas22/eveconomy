@@ -10,6 +10,50 @@ const CO2_EV_KG_PER_MILE   = 0.05;   // UK grid average
 
 const $ = id => document.getElementById(id);
 
+// Approximate WLTP figures (miles per kWh) for current UK models
+const EV_PRESETS = [
+  { group: 'Tesla',      label: 'Model 3 RWD (2024)',            milesPerKwh: 4.5 },
+  { group: 'Tesla',      label: 'Model 3 Long Range AWD (2024)', milesPerKwh: 4.7 },
+  { group: 'Tesla',      label: 'Model Y RWD (2024)',             milesPerKwh: 4.7 },
+  { group: 'Tesla',      label: 'Model Y Long Range AWD (2024)', milesPerKwh: 4.2 },
+  { group: 'Volkswagen', label: 'ID.3 Pro (58 kWh)',             milesPerKwh: 4.6 },
+  { group: 'Volkswagen', label: 'ID.4 Pro (77 kWh)',             milesPerKwh: 3.6 },
+  { group: 'Audi',       label: 'Q4 e-tron 40 (82 kWh)',         milesPerKwh: 3.6 },
+  { group: 'Hyundai',    label: 'Ioniq 5 RWD (73 kWh)',          milesPerKwh: 4.1 },
+  { group: 'Hyundai',    label: 'Ioniq 6 RWD (77 kWh)',          milesPerKwh: 4.3 },
+  { group: 'Kia',        label: 'EV6 RWD (77 kWh)',              milesPerKwh: 4.3 },
+  { group: 'Kia',        label: 'Niro EV (64 kWh)',              milesPerKwh: 3.9 },
+  { group: 'Nissan',     label: 'Leaf 40 kWh',                   milesPerKwh: 4.7 },
+  { group: 'Renault',    label: 'Megane E-Tech (60 kWh)',         milesPerKwh: 4.0 },
+  { group: 'Renault',    label: 'Renault 5 E-Tech (52 kWh)',      milesPerKwh: 4.3 },
+  { group: 'MG',         label: 'MG4 Standard Range (51 kWh)',   milesPerKwh: 4.3 },
+  { group: 'MG',         label: 'MG4 Extended Range (64 kWh)',   milesPerKwh: 4.4 },
+  { group: 'Peugeot',    label: 'e-208 (54 kWh)',                milesPerKwh: 4.1 },
+  { group: 'Vauxhall',   label: 'Corsa Electric (54 kWh)',       milesPerKwh: 3.8 },
+  { group: 'BMW',        label: 'i4 eDrive40 (84 kWh)',          milesPerKwh: 4.3 },
+  { group: 'MINI',       label: 'Aceman E (54 kWh)',             milesPerKwh: 4.0 },
+  { group: 'Volvo',      label: 'EX30 Single Motor (69 kWh)',    milesPerKwh: 4.3 },
+  { group: 'BYD',        label: 'Seal (82 kWh)',                 milesPerKwh: 3.7 },
+  { group: 'BYD',        label: 'Atto 3 (60 kWh)',              milesPerKwh: 3.5 },
+];
+
+function populateEvPresets() {
+  const sel = $('evPreset');
+  const groups = {};
+  EV_PRESETS.forEach(p => { (groups[p.group] ??= []).push(p); });
+  Object.entries(groups).forEach(([groupName, presets]) => {
+    const og = document.createElement('optgroup');
+    og.label = groupName;
+    presets.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.milesPerKwh;
+      opt.textContent = p.label;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+}
+
 function getLitresPerGallon() {
   return $('unitSystem').value === 'imperial'
     ? LITRES_PER_IMPERIAL_GALLON
@@ -236,6 +280,18 @@ function getResultsText() {
 
 // Wire up events
 document.addEventListener('DOMContentLoaded', () => {
+  populateEvPresets();
+
+  $('evPreset').addEventListener('change', () => {
+    const val = $('evPreset').value;
+    if (val) {
+      $('evEfficiency').value = val;
+      recalculate();
+    }
+  });
+
+  $('evEfficiency').addEventListener('input', () => { $('evPreset').value = ''; });
+
   const inputs = [
     'currency', 'unitSystem', 'annualMiles',
     'evEfficiency', 'electricityPrice', 'evPurchasePrice',
